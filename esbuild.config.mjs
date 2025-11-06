@@ -28,7 +28,7 @@ const context = await esbuild.context({
   banner: {
     js: banner,
   },
-  entryPoints: ['main.ts'],
+  entryPoints: ['src/main.ts'],
   bundle: true,
   external: [
     'obsidian',
@@ -59,7 +59,7 @@ const context = await esbuild.context({
       dest: `${outDir}/manifest.json`,
     }),
     copyPlugin({
-      src: './styles.css',
+      src: './src/styles.css',
       dest: `${outDir}/styles.css`,
     }),
     ...(!prod ? [createFilePlugin({ dest: path.join(outDir, '.hotreload') })] : []),
