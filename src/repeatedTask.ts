@@ -2,7 +2,7 @@ import { Notice, type App, type CachedMetadata, type TFile } from 'obsidian';
 
 export async function handleRepeatedTask(app: App, file: TFile, cache: CachedMetadata) {
   const { frontmatter: fm } = cache;
-  if (!fm || fm.kind !== 'task' || !fm['task.done'] || !fm['task.repeat']) {
+  if (!fm || fm.kind !== 'task' || fm['task.status'].toLowerCase() !== 'done' || !fm['task.repeat']) {
     return;
   }
 
@@ -19,7 +19,7 @@ export async function handleRepeatedTask(app: App, file: TFile, cache: CachedMet
     .format('YYYY-MM-DD');
 
   await app.fileManager.processFrontMatter(file, (fm) => {
-    fm['task.done'] = false;
+    fm['task.status'] = 'Draft';
     fm['task.scheduled'] = nextScheduledDate;
   });
 }
