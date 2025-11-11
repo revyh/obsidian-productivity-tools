@@ -1,4 +1,5 @@
 import { Notice, type App, type CachedMetadata, type TFile } from 'obsidian';
+import { RRule } from 'rrule';
 
 export async function handleRepeatedTask(app: App, file: TFile, cache: CachedMetadata) {
   const { frontmatter: fm } = cache;
@@ -6,20 +7,24 @@ export async function handleRepeatedTask(app: App, file: TFile, cache: CachedMet
     return;
   }
 
-  if (fm['task.repeat'] !== 'every day' && fm['task.repeat'] !== 'every week') {
+  const repeatOptions = RRule.parseText(fm['task.repeat'] as string);
+  if (!repeatOptions) {
     new Notice(`Unsupported repeat value: ${fm['task.repeat']}`);
     return;
   }
 
-  const repeat = fm['task.repeat'] as string;
-  const today = globalThis.moment().format('YYYY-MM-DD');
-  const nextScheduledDate = globalThis
-    .moment(today)
-    .add(1, repeat === 'every day' ? 'day' : 'week')
-    .format('YYYY-MM-DD');
+  const repeatRule = new RRule(repeatOptions);
+  const today = globalThis.moment.utc().toDate();
+
+  const nextScheduledDate = repeatRule.after(today, false);
+
+  if (!nextScheduledDate) {
+    new Notice(`Could not determine next scheduled date for repeat rule: ${fm['task.repeat']}`);
+    return;
+  }
 
   await app.fileManager.processFrontMatter(file, (fm) => {
     fm['task.status'] = 'Draft';
-    fm['task.scheduled'] = nextScheduledDate;
+    fm['task.scheduled'] = globalThis.moment(nextScheduledDate).format('YYYY-MM-DD');
   });
 }
