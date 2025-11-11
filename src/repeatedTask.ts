@@ -12,9 +12,9 @@ export async function handleRepeatedTask(app: App, file: TFile, cache: CachedMet
   }
 
   const repeat = fm['task.repeat'] as string;
-  const scheduledDate = (fm['task.scheduled'] as string) ?? globalThis.moment().format('YYYY-MM-DD');
+  const today = globalThis.moment().format('YYYY-MM-DD');
   const nextScheduledDate = globalThis
-    .moment(scheduledDate)
+    .moment(today)
     .add(1, repeat === 'every day' ? 'day' : 'week')
     .format('YYYY-MM-DD');
 
